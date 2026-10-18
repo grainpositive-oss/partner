@@ -197,6 +197,21 @@ input::placeholder{color:var(--mute)}
 <div class="toast" id="toast" hidden></div>
 
 <script>
+/* 페이지 버전: 고칠 때마다 바꿔요. 홈 화면 앱이 새 버전을 알아차리고 스스로 새로고침해요. */
+const VERSION = "2026-10-18.7";
+async function checkVersion(){
+  try{
+    const r = await fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"});
+    const m = (await r.text()).match(/const VERSION = "([^"]+)"/);
+    if (m && m[1] !== VERSION){
+      const k = "pc_reloaded_" + m[1];
+      if (!sessionStorage.getItem(k)){ sessionStorage.setItem(k, "1"); location.replace(location.pathname + "?v=" + encodeURIComponent(m[1])); }
+    }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkVersion(); });
+window.addEventListener("load", checkVersion);
+
 /* 구글시트 Apps Script 웹 앱 주소. 비어 있으면 미리보기 모드(이 기기에만 저장). */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOmLxdzM_j7dZiRgAT7B_vrPUIYdv1dpkeIbEdM3xOxar466HN5g4reasNZomFD1z1/exec";
 
