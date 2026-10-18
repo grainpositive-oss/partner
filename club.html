@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Positive Club 1st</title>
+<meta property="og:title" content="Positive Club 1st">
+<meta property="og:description" content="포지티브 클럽 1기 도장판">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* Layout: one phone column. Serif nav on top, big tab words, one ivory card per tab. */
+:root{
+  --bg:#E8E7E6;        /* page */
+  --card:#F6F5F3;      /* card */
+  --cell:#DFDDDA;      /* calendar cell */
+  --ink:#151413;       /* black */
+  --mute:#97938D;      /* soft grey-brown */
+  --line:#D4D2CE;
+  --serif:"Newsreader","Pretendard Variable",Pretendard,Georgia,sans-serif;
+  --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;word-break:keep-all}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:480px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.demo{background:var(--ink);color:var(--card);font-size:12px;text-align:center;padding:8px 16px}
+
+header{display:flex;justify-content:space-between;align-items:flex-start;padding-top:28px}
+.nav{font-family:var(--serif);font-size:22px;line-height:1.25;color:var(--mute)}
+.nav button{font-family:inherit;font-size:inherit;line-height:inherit;color:inherit;text-align:left;padding:0}
+.nav button[aria-current="page"]{color:var(--ink)}
+.ndate{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.ntitle{font-size:19px;margin-top:4px;line-height:1.4;text-wrap:balance}
+.nbody{white-space:pre-line;font-size:15px;line-height:1.75;margin-top:10px;color:#2f2d2a;overflow-wrap:anywhere}
+.nlink{display:inline-block;margin-top:14px;font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:8px 14px;background:var(--bg)}
+.mem{list-style:none;margin-top:8px}
+.mem li{padding:16px 0;border-top:1px solid var(--line);display:grid;gap:3px}
+.mem li:first-child{border-top:0}
+.mem .nm{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.mem .nm small{font-size:13px;font-weight:400;color:var(--mute);margin-left:6px}
+.mem .one{font-size:15px;color:#4a4640}
+.mem .one.none{color:var(--mute);font-size:13px}
+.mem .ig{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mem .ig a{font-size:13px;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card)}
+.mem .ig a:hover{border-color:var(--ink)}
+.who{font-family:var(--serif);font-size:22px;line-height:1.25;text-align:right}
+.who small{display:block;font-family:var(--sans);font-size:12px;color:var(--mute)}
+
+.tabs{display:flex;gap:14px;align-items:baseline;margin-top:96px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{font-family:var(--serif);font-size:clamp(24px,7.6vw,40px);line-height:1.1;color:var(--mute);white-space:nowrap;letter-spacing:-.01em}
+.tab[aria-selected="true"]{color:var(--ink)}
+
+.card{background:var(--card);border-radius:26px;padding:22px 18px 20px;margin-top:20px}
+.lbl{font-family:var(--serif);font-style:italic;color:var(--mute);font-size:15px;text-align:center}
+.sum{font-size:21px;line-height:1.4;font-weight:700;text-align:center;margin-top:8px;text-wrap:balance;letter-spacing:-.01em}
+.sub{font-size:14px;color:#5f5a52;text-align:center;margin-top:6px;text-wrap:balance}
+
+.month{display:flex;justify-content:space-between;align-items:center;margin:26px 2px 10px}
+.month b{font-family:var(--serif);font-weight:500;font-size:18px}
+.month button{width:36px;height:36px;border-radius:50%;font-family:var(--serif);font-size:20px}
+.month button:disabled{opacity:.25;cursor:default}
+.dow,.grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.dow span{font-family:var(--serif);font-style:italic;font-size:14px;text-align:center;padding-bottom:6px}
+.grid{gap:3px;border-radius:16px;overflow:hidden}
+.c{aspect-ratio:1;background:var(--cell);display:grid;place-items:start center;position:relative;max-width:100%}
+.c.out{background:transparent}
+.c .d{position:absolute;top:4px;left:6px;font-size:10px;color:var(--mute);font-variant-numeric:tabular-nums}
+.c .dot{position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);width:42%;aspect-ratio:1;border-radius:50%}
+.c.on .dot{background:var(--ink)}
+.c.today:not(.on) .dot{border:1.5px solid var(--ink)}
+.c.future{opacity:.5}
+.legend{display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:12px;color:var(--mute)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ink);margin-right:5px;vertical-align:0}
+.legend i.r{background:none;border:1.5px solid var(--ink)}
+
+h3{font-family:var(--sans);font-weight:600;font-size:19px;letter-spacing:-.01em}
+.hint{font-size:13px;color:var(--mute);margin-top:2px}
+form{display:grid;gap:8px;margin-top:14px}
+input[type=text],input[type=url]{width:100%;font:inherit;font-size:16px;background:var(--bg);border:1px solid transparent;border-radius:14px;padding:13px 14px;color:var(--ink)}
+input::placeholder{color:var(--mute)}
+.btn{background:var(--ink);color:var(--card);border-radius:999px;padding:14px;font-weight:500;font-size:15px}
+.btn:disabled{opacity:.4}
+.done{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.done i{width:14px;height:14px;border-radius:50%;background:var(--ink);flex:none}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;background:var(--card)}
+.chip.me{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.empty{color:var(--mute);font-size:14px;margin-top:10px}
+
+.feed{list-style:none;margin-top:6px}
+.feed li{padding:16px 0;border-top:1px solid var(--line);display:grid;gap:4px}
+.feed li:first-child{border-top:0}
+.fh{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--mute)}
+.fh b{color:var(--ink);font-weight:500;font-size:15px}
+.memo{font-size:15px;overflow-wrap:anywhere}
+.fl{font-family:var(--serif);font-style:italic;font-size:15px;text-decoration:none;border-bottom:1px solid var(--ink);justify-self:start}
+.del{font-size:12px;color:var(--mute);text-decoration:underline;justify-self:start}
+
+.bioname{font-family:var(--sans);font-weight:600;letter-spacing:-.02em;font-size:30px;line-height:1.15;text-align:center;margin-top:6px}
+.bioname small{font-size:18px;color:var(--mute);margin-left:6px}
+.handle{text-align:center;margin-top:4px;font-size:14px}
+.handle a{text-decoration:none;border-bottom:1px solid var(--line)}
+.idt{font-size:21px;font-weight:700;text-align:center;margin:8px 0 0;text-wrap:balance;line-height:1.4;letter-spacing:-.01em}
+.idtbox{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+.ko{font-size:13px;color:var(--mute);text-align:center}
+.edit{display:block;margin:10px auto 0;font-size:13px;color:var(--mute);text-decoration:underline}
+.idtform{display:grid;gap:8px;margin-top:12px}
+.goal{font-size:18px;font-weight:600;line-height:1.45;margin-top:10px;letter-spacing:-.01em}
+.dayin{display:flex;align-items:center;gap:8px}
+.dayin input{width:96px;font:inherit;font-size:16px;font-weight:600;background:var(--bg);border:1px solid transparent;border-radius:14px;padding:12px 14px;color:var(--ink);text-align:center}
+.dayin span{font-size:15px}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.days button{border:1px solid var(--line);border-radius:12px;padding:11px 0;font-size:15px;background:var(--card)}
+.days button[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.bar{height:6px;border-radius:99px;background:var(--cell);margin-top:14px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink);border-radius:99px}
+.small{font-size:13px;color:var(--mute);margin-top:6px}
+.biobox{background:var(--bg);border-radius:16px;padding:14px 16px;margin-top:10px;font-size:15px;line-height:1.75}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);margin-top:18px;text-align:center}
+.stat b{display:block;font-family:var(--sans);font-weight:600;letter-spacing:-.02em;font-size:28px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--mute)}
+
+.sheet{position:fixed;inset:0;background:rgba(21,20,19,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet>div{background:var(--card);width:100%;max-width:480px;border-radius:26px 26px 0 0;
+  padding:22px max(20px,env(safe-area-inset-left,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-right,0px));max-height:85vh;overflow:auto}
+.sheet h3{text-align:center}
+.pick{display:grid;gap:6px;margin-top:16px}
+.pick button{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:13px 16px;border-radius:14px;background:var(--bg);gap:10px}
+.pick button span{font-size:12px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--card);padding:11px 18px;border-radius:999px;font-size:14px;z-index:30;max-width:calc(100% - 40px);text-align:center}
+@media (prefers-reduced-motion:no-preference){.c.on .dot{animation:pop .35s ease-out both}@keyframes pop{from{transform:translate(-50%,-50%) scale(.4)}to{transform:translate(-50%,-50%) scale(1)}}}
+</style>
+</head>
+<body>
+<div id="demo" class="demo" hidden>미리보기 모드예요. 아직 구글시트가 연결되지 않아서 이 기기에만 저장돼요.</div>
+<div class="wrap">
+  <header>
+    <div class="nav"><button type="button" id="navHome">Positive Club</button><br><button type="button" id="navMem">1st Members</button><br><button type="button" id="navBr">Branding Notes</button></div>
+    <button class="who" id="whoBtn" type="button">Profile<small id="whoName">이름 선택</small></button>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-bio" aria-selected="false" data-tab="bio">My Bio</button>
+    <button class="tab" role="tab" id="t-act" aria-selected="true" data-tab="act">Activity</button>
+    <button class="tab" role="tab" id="t-con" aria-selected="false" data-tab="con">Contents</button>
+  </div>
+
+  <main id="view"></main>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">누구신가요?</h3>
+    <p class="hint" style="text-align:center">한 번 고르면 이 폰에서 기억해요.</p>
+    <div class="pick" id="pick"></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* 구글시트 Apps Script 웹 앱 주소. 비어 있으면 미리보기 모드(이 기기에만 저장). */
+const SCRIPT_URL = "";
+
+const MEMBERS = [{"id":"arin","name":"강아린","nick":"Blair","handle":"@maeryeok_blair_k"},{"id":"jeongyeon","name":"박정연","nick":"Sunny","handle":"@goodthingsunny"},{"id":"eunjin","name":"박은진","nick":"","handle":"@eunjin_.p · @july.injoy"},{"id":"jihee","name":"김지희","nick":"","handle":"@jyihii"},{"id":"minji","name":"김민지","nick":"","handle":"@minnxzee"},{"id":"jiyu","name":"이지유","nick":"","handle":"@lll._.yoo_"},{"id":"minyoung","name":"박민영","nick":"","handle":"@run.with.0"},{"id":"hyeji","name":"김혜지","nick":"","handle":"@ownlyglobal"},{"id":"hyejin","name":"권혜진","nick":"피넛","handle":"@__jinik"},{"id":"eunbin","name":"이은빈","nick":"","handle":"@strawberryilikeyou"}];
+const START = "2026-10"; // 클럽 시작 달
+
+const $ = s => document.querySelector(s);
+const byId = Object.fromEntries(MEMBERS.map(m => [m.id, m]));
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let me = store.get("pc_me"); if (!byId[me]) me = null;
+let tab = store.get("pc_tab") || "act";
+let rows = [];
+let loading = true;
+let viewMonth = new Date(); viewMonth.setDate(1);
+let feedMine = false;
+let busy = false;
+let profiles = {};
+let editIdt = false;
+let goals = {};
+let editGoal = false;
+let goalDays = 8;
+let notes = [];
+
+/* ---------- data ---------- */
+async function load(){
+  if (!SCRIPT_URL){
+    try{ rows = JSON.parse(store.get("pc_demo_rows") || "[]"); }catch(e){ rows = []; }
+    try{ profiles = JSON.parse(store.get("pc_demo_profiles") || "{}"); }catch(e){ profiles = {}; }
+    try{ goals = JSON.parse(store.get("pc_demo_goals") || "{}"); }catch(e){ goals = {}; }
+    notes = [{date:"2026-10-18", title:"예시 · 첫 번째 브랜딩 노트", body:"구글시트의 branding 탭에 한 줄을 추가하면 이 자리에 글이 올라와요.\n줄바꿈도 그대로 보여요.", link:"https://www.instagram.com/", demo:true}];
+    loading = false; render(); return;
+  }
+  try{
+    const r = await fetch(SCRIPT_URL, {cache:"no-store"});
+    const j = await r.json();
+    if (j.ok){ rows = j.rows; profiles = j.profiles || {}; goals = j.goals || {}; notes = j.notes || []; }
+  }catch(e){ toast("기록을 불러오지 못했어요. 잠시 후 새로고침해 주세요."); }
+  loading = false; render();
+}
+async function post(body){
+  if (!SCRIPT_URL){
+    if (body.action === "goal"){ goals[body.member + "|" + body.month] = {goal:body.goal, days:body.days}; store.set("pc_demo_goals", JSON.stringify(goals)); return true; }
+    if (body.action === "profile"){ profiles[body.member] = body.idt; store.set("pc_demo_profiles", JSON.stringify(profiles)); return true; }
+    if (body.action === "delete") rows = rows.filter(r => r.id !== body.id);
+    else rows.push({id:"d"+Date.now(), at:new Date().toISOString(), member:body.member, date:body.date, link:body.link, memo:body.memo});
+    store.set("pc_demo_rows", JSON.stringify(rows));
+    return true;
+  }
+  const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || "fail");
+  return true;
+}
+
+/* ---------- helpers ---------- */
+function monthKey(d){ return d.getFullYear() + "-" + pad(d.getMonth()+1); }
+function myGoal(id){ return goals[id + "|" + monthKey(new Date())] || null; }
+function myDays(id){ return new Set(rows.filter(r => r.member === id).map(r => r.date)); }
+function weekStart(d){ const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate() - x.getDay()); return x; }
+function countRange(days, from, n){ let c = 0; const x = new Date(from); for (let i=0;i<n;i++){ if (days.has(ymd(x))) c++; x.setDate(x.getDate()+1); } return c; }
+
+function summary(days){
+  const today = new Date();
+  const ws = weekStart(today);
+  const lws = new Date(ws); lws.setDate(ws.getDate()-7);
+  const thisW = countRange(days, ws, 7);
+  const lastW = countRange(days, lws, 7);
+  const mFirst = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthN = countRange(days, mFirst, today.getDate());
+  let streak = 0; const x = new Date(today); x.setHours(0,0,0,0);
+  if (!days.has(ymd(x))) x.setDate(x.getDate()-1);
+  while (days.has(ymd(x))){ streak++; x.setDate(x.getDate()-1); }
+
+  let main, sub;
+  const g = myGoal(me);
+  if (g && g.days){
+    main = monthN >= g.days ? "이번 달 목표 " + g.days + "일을 채웠어요." : "목표 " + g.days + "일 중 " + monthN + "일 채웠어요.";
+    sub = monthN === 0 ? "콘텐츠를 올린 날, 링크를 남기면 도장이 찍혀요." : (streak >= 3 ? streak + "일째 이어가고 있어요." : "");
+  }
+  else if (monthN === 0){ main = "이번 달 첫 도장을 찍어볼까요?"; sub = "콘텐츠를 올린 날, 링크를 남기면 도장이 찍혀요."; }
+  else if (streak >= 3){ main = streak + "일째 이어가고 있어요."; sub = "이번 달 벌써 " + monthN + "일 채웠어요."; }
+  else { main = "이번 달 벌써 " + monthN + "일 채웠어요."; sub = ""; }
+  if (monthN > 0 && !(g && monthN >= g.days)){
+    if (thisW > lastW) sub = (sub ? sub + " " : "") + "지난주보다 " + (thisW - lastW) + "번 더 올렸어요.";
+    else if (thisW === lastW && thisW > 0) sub = (sub ? sub + " " : "") + "지난주와 같은 속도로 가고 있어요.";
+    else if (thisW === 0) sub = (sub ? sub + " " : "") + "이번 주 첫 도장을 기다리고 있어요.";
+    else sub = (sub ? sub + " " : "") + "이번 주 " + thisW + "번 올렸어요.";
+  }
+  return {main, sub};
+}
+
+/* ---------- render ---------- */
+function render(){
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab === tab)));
+  const m = me && byId[me];
+  $("#whoName").textContent = m ? m.name : "이름 선택";
+  const v = $("#view");
+  $("#navMem").setAttribute("aria-current", tab === "mem" ? "page" : "false");
+  $("#navBr").setAttribute("aria-current", tab === "br" ? "page" : "false");
+  if (tab === "mem"){ renderMem(v); return; }
+  if (tab === "br"){ if (loading){ v.innerHTML = `<section class="card"><p class="lbl">Loading</p><p class="sub">불러오는 중이에요.</p></section>`; return; } renderBr(v); return; }
+  if (!me && tab !== "con"){ v.innerHTML = `<section class="card"><p class="lbl">Welcome</p><p class="sum">포지티브 클럽 1기 도장판이에요.</p><p class="sub">먼저 내 이름을 골라 주세요.</p><div style="margin-top:18px;display:grid"><button class="btn" type="button" id="pickOpen">이름 고르기</button></div></section>`; $("#pickOpen").onclick = openSheet; return; }
+  if (loading){ v.innerHTML = `<section class="card"><p class="lbl">Loading</p><p class="sub">기록을 불러오는 중이에요.</p></section>`; return; }
+  if (tab === "act") renderAct(v, m);
+  else if (tab === "bio") renderBio(v, m);
+  else renderCon(v);
+}
+
+function goalBlock(){
+  const g = myGoal(me);
+  if (!g) return `<p class="small" style="text-align:center;margin-top:12px"><button type="button" class="edit" style="display:inline;margin:0" data-go="bio">이번 달 목표 정하기</button></p>`;
+  const now = new Date();
+  const n = countRange(myDays(me), new Date(now.getFullYear(), now.getMonth(), 1), now.getDate());
+  const pct = Math.min(100, Math.round(n / g.days * 100));
+  return `<div class="bar" aria-label="목표 ${g.days}일 중 ${n}일"><i style="width:${pct}%"></i></div>
+    ${g.goal ? `<p class="small" style="text-align:center">${monthLabel()} 목표 · ${esc(g.goal)}</p>` : ""}`;
+}
+function monthLabel(){ return (new Date().getMonth()+1) + "월"; }
+
+function renderAct(v, m){
+  const days = myDays(me);
+  const s = summary(days);
+  const today = ymd(new Date());
+  const y = viewMonth.getFullYear(), mo = viewMonth.getMonth();
+  const first = new Date(y, mo, 1), last = new Date(y, mo+1, 0).getDate();
+  let cells = "";
+  for (let i=0;i<first.getDay();i++) cells += `<div class="c out"></div>`;
+  for (let d=1; d<=last; d++){
+    const k = y+"-"+pad(mo+1)+"-"+pad(d);
+    const cls = ["c"]; if (days.has(k)) cls.push("on"); if (k === today) cls.push("today"); if (k > today) cls.push("future");
+    cells += `<div class="${cls.join(" ")}" aria-label="${mo+1}월 ${d}일${days.has(k)?" 도장":""}"><span class="d">${d}</span><span class="dot"></span></div>`;
+  }
+  const endPad = (7 - (first.getDay() + last) % 7) % 7;
+  for (let i=0;i<endPad;i++) cells += `<div class="c out"></div>`;
+  const mk = y+"-"+pad(mo+1);
+  const now = new Date(); const nowK = now.getFullYear()+"-"+pad(now.getMonth()+1);
+  const todayRows = rows.filter(r => r.member === me && r.date === today);
+  const todayMembers = [...new Set(rows.filter(r => r.date === today).map(r => r.member))].filter(id => byId[id]);
+
+  v.innerHTML = `
+  <section class="card">
+    <p class="lbl">Summary</p>
+    <p class="sum">${esc(s.main)}</p>
+    ${s.sub ? `<p class="sub">${esc(s.sub)}</p>` : ""}
+    ${goalBlock()}
+    <div class="month">
+      <button type="button" id="prevM" aria-label="이전 달" ${mk <= START ? "disabled" : ""}>‹</button>
+      <b>${first.toLocaleString("en-US",{month:"long"})} ${y}</b>
+      <button type="button" id="nextM" aria-label="다음 달" ${mk >= nowK ? "disabled" : ""}>›</button>
+    </div>
+    <div class="dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    <div class="grid">${cells}</div>
+    <div class="legend"><span><i></i>올린 날</span><span><i class="r"></i>오늘</span></div>
+  </section>
+
+  <section class="card">
+    <h3>오늘의 도장</h3>
+    <p class="hint">게시물이나 릴스를 올렸다면 링크를 남겨 주세요.</p>
+    ${todayRows.length ? `<div class="done"><i></i><span>오늘 도장 완료. 더 올렸다면 하나 더 남겨도 돼요.</span></div>` : ""}
+    <form id="stampForm" autocomplete="off" novalidate>
+      <input type="url" id="f-link" inputmode="url" placeholder="인스타 링크 붙여넣기">
+      <button class="btn" type="submit" id="f-btn">${todayRows.length ? "하나 더 남기기" : "도장 찍기"}</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h3>오늘 함께한 멤버</h3>
+    ${todayMembers.length ? `<div class="chips">${todayMembers.map(id => `<span class="chip ${id===me?"me":""}">${esc(byId[id].name)}</span>`).join("")}</div>` : `<p class="empty">아직 아무도 없어요. 첫 도장의 주인공이 되어 보세요.</p>`}
+  </section>`;
+
+  v.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { tab = b.dataset.go; editGoal = true; store.set("pc_tab", tab); render(); });
+  $("#prevM").onclick = () => { viewMonth.setMonth(viewMonth.getMonth()-1); render(); };
+  $("#nextM").onclick = () => { viewMonth.setMonth(viewMonth.getMonth()+1); render(); };
+  $("#stampForm").onsubmit = async e => {
+    e.preventDefault();
+    if (busy) return;
+    let link = $("#f-link").value.trim(); const memo = "";
+    if (!link){ toast("올린 콘텐츠의 링크를 붙여넣어 주세요."); return; }
+    if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
+    busy = true; $("#f-btn").disabled = true;
+    try{
+      await post({member:me, date:today, link, memo});
+      toast("도장 찍었어요.");
+      if (SCRIPT_URL){ loading = false; await load(); } else render();
+    }catch(err){ toast("저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요."); $("#f-btn").disabled = false; }
+    busy = false;
+  };
+}
+
+function goalCard(monthN){
+  const g = myGoal(me);
+  const editing = editGoal || !g;
+  if (editing){
+    const cur = g ? g.days : goalDays;
+    return `<section class="card">
+      <h3>${monthLabel()}의 목표</h3>
+      <p class="hint" style="line-height:1.7">목표를 정하면 목표치에 좀 더 빠르게 도달할 수 있고, 방향성도 빠르게 잡을 수 있어요. 예를 들어 저장 수 늘리기, 게시물 개수 늘리기, 영상 시청 시간 늘리기처럼 구체적인 목표치를 정하면 좋아요!</p>
+      <form class="idtform" id="goalForm" autocomplete="off">
+        <input type="text" id="f-goal" maxlength="60" value="${esc(g ? g.goal : "")}" placeholder="이번 달 목표 (예: 게시물 저장 수 2배로 늘리기)">
+        <p class="small" style="margin:6px 0 0">이번 달 도장 목표</p>
+        <div class="dayin"><input type="number" id="f-days" inputmode="numeric" min="1" max="31" value="${cur}" aria-label="이번 달 도장 목표 일수"><span>일</span></div>
+        <button class="btn" type="submit" id="f-goalbtn" style="margin-top:6px">목표 저장하기</button>
+      </form>
+    </section>`;
+  }
+  const pct = Math.min(100, Math.round(monthN / g.days * 100));
+  return `<section class="card">
+    <h3>${monthLabel()}의 목표</h3>
+    ${g.goal ? `<p class="goal">${esc(g.goal)}</p>` : ""}
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <p class="small">도장 목표 ${g.days}일 중 ${monthN}일</p>
+    <button type="button" class="edit" id="goalEdit" style="margin-left:0">고치기</button>
+  </section>`;
+}
+function bindGoal(){
+  if ($("#goalEdit")) $("#goalEdit").onclick = () => { editGoal = true; render(); };
+  const f = $("#goalForm"); if (!f) return;
+
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const goal = $("#f-goal").value.trim();
+    if (!goal){ toast("이번 달 목표를 적어 주세요."); return; }
+    const sel = Math.round(Number($("#f-days").value));
+    if (!(sel >= 1 && sel <= 31)){ toast("도장 목표는 1일부터 31일 사이로 적어 주세요."); return; }
+    $("#f-goalbtn").disabled = true;
+    const month = monthKey(new Date());
+    try{ await post({action:"goal", member:me, month, goal, days:sel}); goals[me + "|" + month] = {goal, days:sel}; editGoal = false; toast("목표를 저장했어요."); render(); }
+    catch(err){ toast("저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요."); $("#f-goalbtn").disabled = false; }
+  };
+}
+
+function renderBio(v, m){
+  const days = myDays(me);
+  const now = new Date();
+  const mFirst = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthN = countRange(days, mFirst, now.getDate());
+  const total = days.size;
+  const links = rows.filter(r => r.member === me && r.link).length;
+  const handles = m.handle.split(" · ").map(h => `<a href="https://www.instagram.com/${encodeURIComponent(h.replace(/^@/,""))}/" target="_blank" rel="noopener">${esc(h)} ↗</a>`).join(" · ");
+  const mine = profiles[me] || "";
+  const editing = editIdt || !mine;
+  v.innerHTML = `
+  <section class="card">
+    <p class="lbl">Account</p>
+    <p class="bioname">${esc(m.name)}${m.nick ? `<small>${esc(m.nick)}</small>` : ""}</p>
+    <p class="handle">${handles}</p>
+    <div class="idtbox">
+      <p class="ko">나를 한 줄로</p>
+      ${editing ? `
+      <form class="idtform" id="idtForm" autocomplete="off">
+        <input type="text" id="f-idt" maxlength="40" value="${esc(mine)}" placeholder="내 계정을 한 문장으로 정의해 주세요">
+        <button class="btn" type="submit" id="f-idtbtn">저장하기</button>
+      </form>` : `
+      <p class="idt">${esc(mine)}</p>
+      <button type="button" class="edit" id="idtEdit">고치기</button>`}
+    </div>
+    <div class="stat">
+      <div><b>${monthN}</b><span>이번 달 도장</span></div>
+      <div><b>${total}</b><span>전체 도장</span></div>
+      <div><b>${links}</b><span>남긴 콘텐츠</span></div>
+    </div>
+  </section>
+  ${goalCard(monthN)}`;
+  bindGoal();
+  if ($("#idtEdit")) $("#idtEdit").onclick = () => { editIdt = true; render(); };
+  if ($("#idtForm")) $("#idtForm").onsubmit = async e => {
+    e.preventDefault();
+    const val = $("#f-idt").value.trim();
+    if (!val){ toast("한 문장을 적어 주세요."); return; }
+    $("#f-idtbtn").disabled = true;
+    try{ await post({action:"profile", member:me, idt:val}); profiles[me] = val; editIdt = false; toast("저장했어요."); render(); }
+    catch(err){ toast("저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요."); $("#f-idtbtn").disabled = false; }
+  };
+}
+
+function renderBr(v){
+  const list = notes.slice().sort((a,b) => String(b.date).localeCompare(String(a.date)));
+  const fmt = d => { const p = String(d).split("-"); return p.length === 3 ? p[0] + "." + p[1] + "." + p[2] : esc(d); };
+  v.innerHTML = `
+  <section class="card">
+    <p class="lbl">Branding Notes</p>
+    <p class="sum">내 계정을 키우는<br>브랜딩 이야기</p>
+    <p class="sub">포지티브 클럽이 1기 멤버를 위해 모아두는 브랜딩 노트예요.</p>
+  </section>
+  ${list.length ? list.map(n => `
+  <article class="card note">
+    <p class="ndate">${fmt(n.date)}</p>
+    <h3 class="ntitle">${esc(n.title)}</h3>
+    ${n.body ? `<p class="nbody">${esc(n.body)}</p>` : ""}
+    ${n.link ? `<a class="nlink" href="${esc(n.link)}" target="_blank" rel="noopener">자세히 보기 ↗</a>` : ""}
+  </article>`).join("") : `<section class="card"><p class="empty" style="text-align:center;margin:0">첫 번째 브랜딩 노트가 곧 올라와요.</p></section>`}`;
+}
+
+function renderMem(v){
+  const igs = h => h.split(" · ").map(x => `<a href="https://www.instagram.com/${encodeURIComponent(x.replace(/^@/,""))}/" target="_blank" rel="noopener">${esc(x)} ↗</a>`).join("");
+  v.innerHTML = `
+  <section class="card">
+    <p class="lbl">1st Members</p>
+    <p class="sum">포지티브 1기 팀원들을<br>알아볼까요?</p>
+    <p class="sub">이름 아래 계정을 누르면 인스타그램으로 바로 가요.</p>
+    <ul class="mem" style="margin-top:14px">${MEMBERS.map(m => `
+      <li>
+        <p class="nm">${esc(m.name)}${m.nick ? `<small>${esc(m.nick)}</small>` : ""}${m.id === me ? `<small>· 나</small>` : ""}</p>
+        ${profiles[m.id] ? `<p class="one">${esc(profiles[m.id])}</p>` : `<p class="one none">아직 한 줄 소개를 쓰지 않았어요.</p>`}
+        <div class="ig">${igs(m.handle)}</div>
+      </li>`).join("")}</ul>
+  </section>`;
+}
+
+function renderCon(v){
+  const list = rows.filter(r => byId[r.member] && (!feedMine || r.member === me))
+    .sort((a,b) => (b.date + b.at).localeCompare(a.date + a.at));
+  const fmt = d => { const [y,mo,dd] = d.split("-"); return Number(mo) + "월 " + Number(dd) + "일"; };
+  const host = u => { try{ const h = new URL(u).hostname.replace(/^www\./,""); return h.includes("instagram") ? "instagram" : h; }catch(e){ return "링크"; } };
+  v.innerHTML = `
+  <section class="card">
+    <p class="lbl">Our Contents</p>
+    <p class="sum">우리가 올린 콘텐츠</p>
+    <p class="sub">들어가서 댓글 하나씩 남겨 주세요.</p>
+    <div class="chips" style="justify-content:center">
+      <button type="button" class="chip" id="fAll" aria-pressed="${!feedMine}">전체</button>
+      ${me ? `<button type="button" class="chip" id="fMine" aria-pressed="${feedMine}">내 것만</button>` : ""}
+    </div>
+    ${list.length ? `<ul class="feed" style="margin-top:12px">${list.map(r => `
+      <li>
+        <div class="fh"><b>${esc(byId[r.member].name)}</b><span>${fmt(r.date)}</span></div>
+        ${r.memo ? `<p class="memo">${esc(r.memo)}</p>` : ""}
+        ${r.link ? `<a class="fl" href="${esc(r.link)}" target="_blank" rel="noopener">${esc(host(r.link))} ↗</a>` : ""}
+        ${r.member === me ? `<button type="button" class="del" data-id="${esc(r.id)}">지우기</button>` : ""}
+      </li>`).join("")}</ul>` : `<p class="empty" style="text-align:center;margin-top:18px">아직 올라온 콘텐츠가 없어요. Activity에서 첫 링크를 남겨 보세요.</p>`}
+  </section>`;
+  $("#fAll").onclick = () => { feedMine = false; render(); };
+  if ($("#fMine")) $("#fMine").onclick = () => { feedMine = true; render(); };
+  v.querySelectorAll(".del").forEach(b => b.onclick = async () => {
+    if (b.dataset.confirm !== "1"){ b.dataset.confirm = "1"; b.textContent = "한 번 더 누르면 지워져요"; return; }
+    b.disabled = true;
+    try{ await post({action:"delete", id:b.dataset.id, member:me}); toast("지웠어요."); if (SCRIPT_URL) await load(); else render(); }
+    catch(e){ toast("지우지 못했어요. 다시 시도해 주세요."); b.disabled = false; }
+  });
+}
+
+/* ---------- sheet & toast ---------- */
+function openSheet(){
+  $("#pick").innerHTML = MEMBERS.map(m => `<button type="button" data-id="${m.id}"><b>${esc(m.name)}</b><span>${esc(m.handle)}</span></button>`).join("");
+  $("#pick").querySelectorAll("button").forEach(b => b.onclick = () => { me = b.dataset.id; store.set("pc_me", me); $("#sheet").hidden = true; render(); });
+  $("#sheet").hidden = false;
+}
+$("#sheet").addEventListener("click", e => { if (e.target.id === "sheet") $("#sheet").hidden = true; });
+let tt;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => t.hidden = true, 2600); }
+
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => { tab = t.dataset.tab; store.set("pc_tab", tab); render(); });
+$("#whoBtn").onclick = openSheet;
+$("#navMem").onclick = () => { tab = "mem"; store.set("pc_tab", tab); render(); };
+$("#navBr").onclick = () => { tab = "br"; store.set("pc_tab", tab); render(); };
+$("#navHome").onclick = () => { tab = "act"; store.set("pc_tab", tab); render(); };
+if (!SCRIPT_URL) $("#demo").hidden = false;
+render(); load();
+</script>
+</body>
+</html>
