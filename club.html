@@ -3,7 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Positive Club 1st</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Positive Club">
+<meta name="application-name" content="Positive Club">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#E8E7E6">
+<link rel="manifest" href="club.webmanifest">
+<link rel="icon" type="image/png" href="pc-icon-192.png">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<title>Positive Club</title>
 <meta property="og:title" content="Positive Club 1st">
 <meta property="og:description" content="포지티브 클럽 1기 도장판">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -190,7 +199,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 let me = store.get("pc_me"); if (!byId[me]) me = null;
 let tab = store.get("pc_tab") || "act";
 let rows = [];
-let loading = true;
+let loading = true; /* set false below when a cache exists */
 let viewMonth = new Date(); viewMonth.setDate(1);
 let feedMine = false;
 let busy = false;
@@ -200,6 +209,12 @@ let goals = {};
 let editGoal = false;
 let goalDays = 8;
 let notes = [];
+let loadError = false;
+let cached = false;
+try{
+  const c = JSON.parse(store.get("pc_cache") || "null");
+  if (c && Array.isArray(c.rows)){ rows = c.rows; profiles = c.profiles || {}; goals = c.goals || {}; notes = c.notes || []; cached = true; }
+}catch(e){}
 
 /* ---------- data ---------- */
 async function load(){
@@ -210,12 +225,36 @@ async function load(){
     notes = [{date:"2026-10-18", title:"예시 · 첫 번째 브랜딩 노트", body:"구글시트의 branding 탭에 한 줄을 추가하면 이 자리에 글이 올라와요.\n줄바꿈도 그대로 보여요.", link:"https://www.instagram.com/", demo:true}];
     loading = false; render(); return;
   }
+  let j = null;
   try{
-    const r = await fetch(SCRIPT_URL, {cache:"no-store"});
-    const j = await r.json();
-    if (j.ok){ rows = j.rows; profiles = j.profiles || {}; goals = j.goals || {}; notes = j.notes || []; }
-  }catch(e){ toast("기록을 불러오지 못했어요. 잠시 후 새로고침해 주세요."); }
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 12000);
+    const r = await fetch(SCRIPT_URL + "?t=" + Date.now(), {signal: ctl.signal});
+    clearTimeout(t);
+    j = await r.json();
+  }catch(e){ j = null; }
+  if (!j || !j.ok){ try{ j = await jsonp(); }catch(e){ j = null; } }
+  if (j && j.ok){
+    rows = j.rows || []; profiles = j.profiles || {}; goals = j.goals || {}; notes = j.notes || [];
+    store.set("pc_cache", JSON.stringify({rows, profiles, goals, notes}));
+    loadError = false;
+  } else if (!cached){
+    loadError = true;
+  } else {
+    toast("최신 기록을 불러오지 못해서 마지막으로 본 기록을 보여드려요.");
+  }
   loading = false; render();
+}
+function jsonp(){
+  return new Promise((res, rej) => {
+    const cb = "pcCb" + Date.now();
+    const el = document.createElement("script");
+    const t = setTimeout(() => { cleanup(); rej(new Error("timeout")); }, 15000);
+    function cleanup(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb] = undefined; } el.remove(); }
+    window[cb] = data => { cleanup(); res(data); };
+    el.onerror = () => { cleanup(); rej(new Error("jsonp")); };
+    el.src = SCRIPT_URL + "?callback=" + cb + "&t=" + Date.now();
+    document.head.appendChild(el);
+  });
 }
 async function post(body){
   if (!SCRIPT_URL){
@@ -277,6 +316,8 @@ function render(){
   const v = $("#view");
   $("#navMem").setAttribute("aria-current", tab === "mem" ? "page" : "false");
   $("#navBr").setAttribute("aria-current", tab === "br" ? "page" : "false");
+  if (cached && SCRIPT_URL) loading = false;
+  if (loadError){ v.innerHTML = `<section class="card"><p class="lbl">Offline</p><p class="sum">기록을 불러오지 못했어요.</p><p class="sub">인터넷 연결을 확인하고 다시 시도해 주세요.</p><div style="margin-top:18px;display:grid"><button class="btn" type="button" id="retry">다시 불러오기</button></div></section>`; $("#retry").onclick = () => { loadError = false; loading = true; render(); load(); }; return; }
   if (tab === "mem"){ renderMem(v); return; }
   if (tab === "br"){ if (loading){ v.innerHTML = `<section class="card"><p class="lbl">Loading</p><p class="sub">불러오는 중이에요.</p></section>`; return; } renderBr(v); return; }
   if (!me && tab !== "con"){ v.innerHTML = `<section class="card"><p class="lbl">Welcome</p><p class="sum">포지티브 클럽 1기 도장판이에요.</p><p class="sub">먼저 내 이름을 골라 주세요.</p><div style="margin-top:18px;display:grid"><button class="btn" type="button" id="pickOpen">이름 고르기</button></div></section>`; $("#pickOpen").onclick = openSheet; return; }
