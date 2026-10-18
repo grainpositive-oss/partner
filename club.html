@@ -172,9 +172,9 @@ input::placeholder{color:var(--mute)}
 
 <script>
 /* 구글시트 Apps Script 웹 앱 주소. 비어 있으면 미리보기 모드(이 기기에만 저장). */
-const SCRIPT_URL = "";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOmLxdzM_j7dZiRgAT7B_vrPUIYdv1dpkeIbEdM3xOxar466HN5g4reasNZomFD1z1/exec";
 
-const MEMBERS = [{"id":"arin","name":"강아린","nick":"Blair","handle":"@maeryeok_blair_k"},{"id":"jeongyeon","name":"박정연","nick":"Sunny","handle":"@goodthingsunny"},{"id":"eunjin","name":"박은진","nick":"","handle":"@eunjin_.p · @july.injoy"},{"id":"jihee","name":"김지희","nick":"","handle":"@jyihii"},{"id":"minji","name":"김민지","nick":"","handle":"@minnxzee"},{"id":"jiyu","name":"이지유","nick":"","handle":"@lll._.yoo_"},{"id":"minyoung","name":"박민영","nick":"","handle":"@run.with.0"},{"id":"hyeji","name":"김혜지","nick":"","handle":"@ownlyglobal"},{"id":"hyejin","name":"권혜진","nick":"피넛","handle":"@__jinik"},{"id":"eunbin","name":"이은빈","nick":"","handle":"@strawberryilikeyou"}];
+const MEMBERS = [{"id":"hyoji","name":"권효지","nick":"Host","handle":""},{"id":"arin","name":"강아린","nick":"Blair","handle":"@maeryeok_blair_k"},{"id":"jeongyeon","name":"박정연","nick":"Sunny","handle":"@goodthingsunny"},{"id":"eunjin","name":"박은진","nick":"","handle":"@eunjin_.p · @july.injoy"},{"id":"jihee","name":"김지희","nick":"","handle":"@jyihii"},{"id":"minji","name":"김민지","nick":"","handle":"@minnxzee"},{"id":"jiyu","name":"이지유","nick":"","handle":"@lll._.yoo_"},{"id":"minyoung","name":"박민영","nick":"","handle":"@run.with.0"},{"id":"hyeji","name":"김혜지","nick":"","handle":"@ownlyglobal"},{"id":"hyejin","name":"권혜진","nick":"피넛","handle":"@__jinik"},{"id":"eunbin","name":"이은빈","nick":"","handle":"@strawberryilikeyou"}];
 const START = "2026-10"; // 클럽 시작 달
 
 const $ = s => document.querySelector(s);
@@ -416,7 +416,7 @@ function renderBio(v, m){
   const monthN = countRange(days, mFirst, now.getDate());
   const total = days.size;
   const links = rows.filter(r => r.member === me && r.link).length;
-  const handles = m.handle.split(" · ").map(h => `<a href="https://www.instagram.com/${encodeURIComponent(h.replace(/^@/,""))}/" target="_blank" rel="noopener">${esc(h)} ↗</a>`).join(" · ");
+  const handles = !m.handle ? "" : m.handle.split(" · ").map(h => `<a href="https://www.instagram.com/${encodeURIComponent(h.replace(/^@/,""))}/" target="_blank" rel="noopener">${esc(h)} ↗</a>`).join(" · ");
   const mine = profiles[me] || "";
   const editing = editIdt || !mine;
   v.innerHTML = `
@@ -472,7 +472,7 @@ function renderBr(v){
 }
 
 function renderMem(v){
-  const igs = h => h.split(" · ").map(x => `<a href="https://www.instagram.com/${encodeURIComponent(x.replace(/^@/,""))}/" target="_blank" rel="noopener">${esc(x)} ↗</a>`).join("");
+  const igs = h => !h ? "" : h.split(" · ").map(x => `<a href="https://www.instagram.com/${encodeURIComponent(x.replace(/^@/,""))}/" target="_blank" rel="noopener">${esc(x)} ↗</a>`).join("");
   v.innerHTML = `
   <section class="card">
     <p class="lbl">1st Members</p>
@@ -521,7 +521,7 @@ function renderCon(v){
 
 /* ---------- sheet & toast ---------- */
 function openSheet(){
-  $("#pick").innerHTML = MEMBERS.map(m => `<button type="button" data-id="${m.id}"><b>${esc(m.name)}</b><span>${esc(m.handle)}</span></button>`).join("");
+  $("#pick").innerHTML = MEMBERS.map(m => `<button type="button" data-id="${m.id}"><b>${esc(m.name)}</b><span>${esc(m.handle || "운영")}</span></button>`).join("");
   $("#pick").querySelectorAll("button").forEach(b => b.onclick = () => { me = b.dataset.id; store.set("pc_me", me); $("#sheet").hidden = true; render(); });
   $("#sheet").hidden = false;
 }
