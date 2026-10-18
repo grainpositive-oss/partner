@@ -50,6 +50,8 @@ header{display:flex;justify-content:space-between;align-items:flex-start;padding
 .nav{font-family:var(--serif);font-size:22px;line-height:1.25;color:var(--mute)}
 .nav button{font-family:inherit;font-size:inherit;line-height:inherit;color:inherit;text-align:left;padding:0}
 .nav button[aria-current="page"]{color:var(--ink)}
+textarea{width:100%;font:inherit;font-size:16px;line-height:1.7;background:var(--bg);border:1px solid transparent;border-radius:14px;padding:13px 14px;color:var(--ink);resize:vertical}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);flex:0 0 auto;padding:14px 20px}
 .ndate{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
 .ntitle{font-size:19px;margin-top:4px;line-height:1.4;text-wrap:balance}
 .nbody{white-space:pre-line;font-size:15px;line-height:1.75;margin-top:10px;color:#2f2d2a;overflow-wrap:anywhere}
@@ -227,6 +229,8 @@ let editGoal = false;
 let goalDays = 8;
 let notes = [];
 let editNums = null;
+let noteEdit = null;
+let noteDraft = null;
 let loadError = false;
 let cached = false;
 try{
@@ -556,19 +560,78 @@ function renderBio(v, m){
 function renderBr(v){
   const list = notes.slice().sort((a,b) => String(b.date).localeCompare(String(a.date)));
   const fmt = d => { const p = String(d).split("-"); return p.length === 3 ? p[0] + "." + p[1] + "." + p[2] : esc(d); };
+  const host = me === "hyoji";
+  const pin = store.get("pc_pin") || "";
+  const form = (n0) => { const n = noteDraft || n0; return `
+    <form class="idtform noteform" data-id="${n0 ? esc(n0.id) : ""}" autocomplete="off" novalidate>
+      <input type="text" name="title" maxlength="120" value="${n ? esc(n.title) : ""}" placeholder="제목">
+      <textarea name="body" rows="7" placeholder="본문">${n ? esc(n.body) : ""}</textarea>
+      <input type="url" name="link" inputmode="url" value="${n ? esc(n.link) : ""}" placeholder="참고 링크 (선택)">
+      ${pin ? "" : `<input type="password" name="pin" inputmode="numeric" placeholder="비밀번호" autocomplete="off">`}
+      <div class="acts" style="gap:8px">
+        <button class="btn" type="submit" style="flex:1">${n ? "고친 내용 저장" : "올리기"}</button>
+        <button class="btn ghost" type="button" data-cancel>취소</button>
+      </div>
+    </form>`; };
   v.innerHTML = `
   <section class="card">
     <p class="lbl">Branding Notes</p>
     <p class="sum">내 계정을 키우는<br>브랜딩 이야기</p>
     <p class="sub">포지티브 클럽이 1기 멤버를 위해 모아두는 브랜딩 노트예요.</p>
+    ${host && noteEdit !== "new" ? `<div style="margin-top:16px;display:grid"><button class="btn" type="button" id="noteNew">노트 쓰기</button></div>` : ""}
   </section>
+  ${host && noteEdit === "new" ? `<section class="card"><h3>새 노트</h3>${form(null)}</section>` : ""}
   ${list.length ? list.map(n => `
   <article class="card note">
+    ${host && noteEdit === n.id ? `<h3>노트 고치기</h3>${form(n)}` : `
     <p class="ndate">${fmt(n.date)}</p>
     <h3 class="ntitle">${esc(n.title)}</h3>
     ${n.body ? `<p class="nbody">${esc(n.body)}</p>` : ""}
     ${n.link ? `<a class="nlink" href="${esc(n.link)}" target="_blank" rel="noopener">자세히 보기 ↗</a>` : ""}
+    ${host && n.id ? `<div class="acts" style="margin-top:14px"><button type="button" class="del" data-nedit="${esc(n.id)}">고치기</button><button type="button" class="del" data-ndel="${esc(n.id)}">지우기</button></div>` : ""}`}
   </article>`).join("") : `<section class="card"><p class="empty" style="text-align:center;margin:0">첫 번째 브랜딩 노트가 곧 올라와요.</p></section>`}`;
+
+  if ($("#noteNew")) $("#noteNew").onclick = () => { noteEdit = "new"; render(); };
+  v.querySelectorAll("[data-cancel]").forEach(b => b.onclick = () => { noteEdit = null; noteDraft = null; render(); });
+  v.querySelectorAll("[data-nedit]").forEach(b => b.onclick = () => { noteEdit = b.dataset.nedit; render(); });
+  v.querySelectorAll("[data-ndel]").forEach(b => b.onclick = async () => {
+    if (b.dataset.confirm !== "1"){ b.dataset.confirm = "1"; b.textContent = "한 번 더 누르면 지워져요"; return; }
+    const p = store.get("pc_pin"); if (!p){ toast("먼저 노트 쓰기에서 비밀번호를 넣어 주세요."); return; }
+    b.disabled = true;
+    try{ await adminPost({action:"note_del", id:b.dataset.ndel}, p); notes = notes.filter(n => n.id !== b.dataset.ndel); toast("지웠어요."); render(); }
+    catch(err){ b.disabled = false; }
+  });
+  v.querySelectorAll(".noteform").forEach(f => f.onsubmit = async e => {
+    e.preventDefault();
+    const title = f.title.value.trim(), body = f.body.value.trim();
+    let link = f.link.value.trim(); if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
+    const p = f.pin ? f.pin.value.trim() : store.get("pc_pin");
+    if (!title){ toast("제목을 적어 주세요."); return; }
+    if (!p){ toast("비밀번호를 넣어 주세요."); return; }
+    const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
+    noteDraft = {title, body, link};
+    const id = f.dataset.id;
+    try{
+      const res = await adminPost(id ? {action:"note_edit", id, title, body, link} : {action:"note_add", title, body, link}, p);
+      store.set("pc_pin", p);
+      if (id){ const n = notes.find(x => x.id === id); if (n){ n.title = title; n.body = body; n.link = link; } }
+      else notes.push({id: res.id, date: res.date || ymd(new Date()), title, body, link});
+      noteEdit = null; noteDraft = null; toast(id ? "고쳤어요." : "노트를 올렸어요."); render();
+    }catch(err){ btn.disabled = false; }
+  });
+}
+async function adminPost(body, pin){
+  body.member = "hyoji"; body.pin = pin;
+  if (!SCRIPT_URL){ return {ok:true, id:"n"+Date.now(), date:ymd(new Date())}; }
+  let j;
+  try{ const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)}); j = await r.json(); }
+  catch(e){ toast("저장하지 못했어요. 인터넷 연결을 확인해 주세요."); throw e; }
+  if (!j.ok){
+    if (j.error === "bad_pin"){ try{ localStorage.removeItem("pc_pin"); }catch(e){} toast("비밀번호가 맞지 않아요. 다시 넣어 주세요."); if (body.action !== "note_del") render(); }
+    else toast("저장하지 못했어요. 새로고침 후 다시 해 주세요.");
+    throw new Error(j.error);
+  }
+  return j;
 }
 
 function renderMem(v){
