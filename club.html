@@ -34,6 +34,8 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 html{-webkit-text-size-adjust:100%;word-break:keep-all}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
@@ -92,6 +94,19 @@ header{display:flex;justify-content:space-between;align-items:flex-start;padding
 .legend{display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:12px;color:var(--mute)}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ink);margin-right:5px;vertical-align:0}
 .legend i.r{background:none;border:1.5px solid var(--ink)}
+.legend i.sq{background:none;border:1.5px solid var(--ink);border-radius:2px}
+.c.last{box-shadow:inset 0 0 0 1.5px var(--ink);opacity:1}
+.c.last .d{color:var(--ink);font-weight:700}
+.dday{text-align:center;font-size:13px;color:var(--mute);margin-top:8px}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nums input{width:100%;font:inherit;font-size:16px;background:var(--bg);border:1px solid transparent;border-radius:14px;padding:13px 14px;color:var(--ink)}
+.metric{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.metric b{color:var(--ink);font-weight:600}
+.numform{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:6px}
+.numform input{width:100%;min-width:0;font:inherit;font-size:16px;background:var(--bg);border:1px solid transparent;border-radius:12px;padding:9px 10px;color:var(--ink)}
+.numform button{background:var(--ink);color:var(--card);border-radius:12px;padding:0 14px;font-size:14px}
+.acts{display:flex;gap:14px}
+.best{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:14px}
 
 h3{font-family:var(--sans);font-weight:600;font-size:19px;letter-spacing:-.01em}
 .hint{font-size:13px;color:var(--mute);margin-top:2px}
@@ -185,6 +200,8 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOmLxdzM_j7dZiRgAT7
 
 const MEMBERS = [{"id":"hyoji","name":"권효지","nick":"Host","handle":""},{"id":"arin","name":"강아린","nick":"Blair","handle":"@maeryeok_blair_k"},{"id":"jeongyeon","name":"박정연","nick":"Sunny","handle":"@goodthingsunny"},{"id":"eunjin","name":"박은진","nick":"","handle":"@eunjin_.p · @july.injoy"},{"id":"jihee","name":"김지희","nick":"","handle":"@jyihii"},{"id":"minji","name":"김민지","nick":"","handle":"@minnxzee"},{"id":"jiyu","name":"이지유","nick":"","handle":"@lll._.yoo_"},{"id":"minyoung","name":"박민영","nick":"","handle":"@run.with.0"},{"id":"hyeji","name":"김혜지","nick":"","handle":"@ownlyglobal"},{"id":"hyejin","name":"권혜진","nick":"피넛","handle":"@__jinik"},{"id":"eunbin","name":"이은빈","nick":"","handle":"@strawberryilikeyou"}];
 const START = "2026-10"; // 클럽 시작 달
+const END = "2026-12";   // 달력에서 넘겨볼 수 있는 마지막 달
+const LAST_DAY = "2026-12-31"; // 1기 마지막 날
 
 const $ = s => document.querySelector(s);
 const byId = Object.fromEntries(MEMBERS.map(m => [m.id, m]));
@@ -209,6 +226,7 @@ let goals = {};
 let editGoal = false;
 let goalDays = 8;
 let notes = [];
+let editNums = null;
 let loadError = false;
 let cached = false;
 try{
@@ -261,7 +279,8 @@ async function post(body){
     if (body.action === "goal"){ goals[body.member + "|" + body.month] = {goal:body.goal, days:body.days}; store.set("pc_demo_goals", JSON.stringify(goals)); return true; }
     if (body.action === "profile"){ profiles[body.member] = body.idt; store.set("pc_demo_profiles", JSON.stringify(profiles)); return true; }
     if (body.action === "delete") rows = rows.filter(r => r.id !== body.id);
-    else rows.push({id:"d"+Date.now(), at:new Date().toISOString(), member:body.member, date:body.date, link:body.link, memo:body.memo});
+    else if (body.action === "nums"){ const r = rows.find(x => x.id === body.id); if (r){ r.views = body.views; r.saves = body.saves; } }
+    else rows.push({id:"d"+Date.now(), at:new Date().toISOString(), member:body.member, date:body.date, link:body.link, memo:body.memo, views:body.views||"", saves:body.saves||""});
     store.set("pc_demo_rows", JSON.stringify(rows));
     return true;
   }
@@ -274,6 +293,8 @@ async function post(body){
 /* ---------- helpers ---------- */
 function monthKey(d){ return d.getFullYear() + "-" + pad(d.getMonth()+1); }
 function myGoal(id){ return goals[id + "|" + monthKey(new Date())] || null; }
+function numOrEmpty(v){ v = String(v).replace(/[^0-9]/g, ""); return v === "" ? "" : String(Number(v)); }
+const fmtN = n => Number(n).toLocaleString("ko-KR");
 function myDays(id){ return new Set(rows.filter(r => r.member === id).map(r => r.date)); }
 function weekStart(d){ const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate() - x.getDay()); return x; }
 function countRange(days, from, n){ let c = 0; const x = new Date(from); for (let i=0;i<n;i++){ if (days.has(ymd(x))) c++; x.setDate(x.getDate()+1); } return c; }
@@ -336,6 +357,14 @@ function goalBlock(){
   return `<div class="bar" aria-label="목표 ${g.days}일 중 ${n}일"><i style="width:${pct}%"></i></div>
     ${g.goal ? `<p class="small" style="text-align:center">${monthLabel()} 목표 · ${esc(g.goal)}</p>` : ""}`;
 }
+function ddayText(){
+  const t = new Date(); t.setHours(0,0,0,0);
+  const [y,m,d] = LAST_DAY.split("-").map(Number);
+  const n = Math.round((new Date(y, m-1, d) - t) / 86400000);
+  if (n > 0) return "포지티브 클럽 1기는 12월 31일까지예요 · D-" + n;
+  if (n === 0) return "오늘은 포지티브 클럽 1기의 마지막 날이에요.";
+  return "포지티브 클럽 1기는 12월 31일에 마무리됐어요.";
+}
 function monthLabel(){ return (new Date().getMonth()+1) + "월"; }
 
 function renderAct(v, m){
@@ -348,7 +377,7 @@ function renderAct(v, m){
   for (let i=0;i<first.getDay();i++) cells += `<div class="c out"></div>`;
   for (let d=1; d<=last; d++){
     const k = y+"-"+pad(mo+1)+"-"+pad(d);
-    const cls = ["c"]; if (days.has(k)) cls.push("on"); if (k === today) cls.push("today"); if (k > today) cls.push("future");
+    const cls = ["c"]; if (days.has(k)) cls.push("on"); if (k === today) cls.push("today"); if (k > today) cls.push("future"); if (k === LAST_DAY) cls.push("last");
     cells += `<div class="${cls.join(" ")}" aria-label="${mo+1}월 ${d}일${days.has(k)?" 도장":""}"><span class="d">${d}</span><span class="dot"></span></div>`;
   }
   const endPad = (7 - (first.getDay() + last) % 7) % 7;
@@ -367,11 +396,12 @@ function renderAct(v, m){
     <div class="month">
       <button type="button" id="prevM" aria-label="이전 달" ${mk <= START ? "disabled" : ""}>‹</button>
       <b>${first.toLocaleString("en-US",{month:"long"})} ${y}</b>
-      <button type="button" id="nextM" aria-label="다음 달" ${mk >= nowK ? "disabled" : ""}>›</button>
+      <button type="button" id="nextM" aria-label="다음 달" ${mk >= (END > nowK ? END : nowK) ? "disabled" : ""}>›</button>
     </div>
     <div class="dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
     <div class="grid">${cells}</div>
-    <div class="legend"><span><i></i>올린 날</span><span><i class="r"></i>오늘</span></div>
+    <div class="legend"><span><i></i>올린 날</span><span><i class="r"></i>오늘</span><span><i class="sq"></i>1기 마지막 날</span></div>
+    <p class="dday">${ddayText()}</p>
   </section>
 
   <section class="card">
@@ -380,6 +410,11 @@ function renderAct(v, m){
     ${todayRows.length ? `<div class="done"><i></i><span>오늘 도장 완료. 더 올렸다면 하나 더 남겨도 돼요.</span></div>` : ""}
     <form id="stampForm" autocomplete="off" novalidate>
       <input type="url" id="f-link" inputmode="url" placeholder="인스타 링크 붙여넣기">
+      <div class="nums">
+        <input type="number" id="f-views" inputmode="numeric" min="0" placeholder="조회수 (선택)">
+        <input type="number" id="f-saves" inputmode="numeric" min="0" placeholder="저장 수 (선택)">
+      </div>
+      <p class="hint" style="margin:0">숫자는 나중에 Contents에서 언제든 고칠 수 있어요.</p>
       <button class="btn" type="submit" id="f-btn">${todayRows.length ? "하나 더 남기기" : "도장 찍기"}</button>
     </form>
   </section>
@@ -396,16 +431,39 @@ function renderAct(v, m){
     e.preventDefault();
     if (busy) return;
     let link = $("#f-link").value.trim(); const memo = "";
+    const views = numOrEmpty($("#f-views").value), saves = numOrEmpty($("#f-saves").value);
     if (!link){ toast("올린 콘텐츠의 링크를 붙여넣어 주세요."); return; }
     if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
     busy = true; $("#f-btn").disabled = true;
     try{
-      await post({member:me, date:today, link, memo});
+      await post({member:me, date:today, link, memo, views, saves});
       toast("도장 찍었어요.");
       if (SCRIPT_URL){ loading = false; await load(); } else render();
     }catch(err){ toast("저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요."); $("#f-btn").disabled = false; }
     busy = false;
   };
+}
+
+function numbersCard(){
+  const mk = monthKey(new Date());
+  const mine = rows.filter(r => r.member === me && String(r.date).startsWith(mk));
+  const withV = mine.filter(r => r.views !== "" && r.views != null);
+  const withS = mine.filter(r => r.saves !== "" && r.saves != null);
+  if (!withV.length && !withS.length){
+    return `<section class="card"><h3>${monthLabel()}의 숫자</h3><p class="hint">도장 찍을 때 조회수와 저장 수를 적으면, 여기서 이번 달 흐름을 볼 수 있어요.</p></section>`;
+  }
+  const avgV = withV.length ? Math.round(withV.reduce((a,r) => a + Number(r.views), 0) / withV.length) : null;
+  const sumS = withS.reduce((a,r) => a + Number(r.saves), 0);
+  const best = withS.slice().sort((a,b) => Number(b.saves) - Number(a.saves))[0];
+  return `<section class="card">
+    <h3>${monthLabel()}의 숫자</h3>
+    <div class="stat">
+      <div><b>${avgV == null ? "-" : fmtN(avgV)}</b><span>평균 조회수</span></div>
+      <div><b>${fmtN(sumS)}</b><span>저장 수 합계</span></div>
+      <div><b>${withV.length || withS.length}</b><span>숫자 적은 콘텐츠</span></div>
+    </div>
+    ${best && Number(best.saves) > 0 ? `<p class="best">저장이 가장 많았던 콘텐츠 · ${fmtN(best.saves)}회 <a class="fl" style="margin-left:6px" href="${esc(best.link)}" target="_blank" rel="noopener">보기 ↗</a></p>` : ""}
+  </section>`;
 }
 
 function goalCard(monthN){
@@ -481,6 +539,7 @@ function renderBio(v, m){
       <div><b>${links}</b><span>남긴 콘텐츠</span></div>
     </div>
   </section>
+  ${numbersCard()}
   ${goalCard(monthN)}`;
   bindGoal();
   if ($("#idtEdit")) $("#idtEdit").onclick = () => { editIdt = true; render(); };
@@ -522,7 +581,6 @@ function renderMem(v){
     <ul class="mem" style="margin-top:14px">${MEMBERS.map(m => `
       <li>
         <p class="nm">${esc(m.name)}${m.nick ? `<small>${esc(m.nick)}</small>` : ""}${m.id === me ? `<small>· 나</small>` : ""}</p>
-        ${profiles[m.id] ? `<p class="one">${esc(profiles[m.id])}</p>` : `<p class="one none">아직 한 줄 소개를 쓰지 않았어요.</p>`}
         <div class="ig">${igs(m.handle)}</div>
       </li>`).join("")}</ul>
   </section>`;
@@ -547,12 +605,34 @@ function renderCon(v){
         <div class="fh"><b>${esc(byId[r.member].name)}</b><span>${fmt(r.date)}</span></div>
         ${r.memo ? `<p class="memo">${esc(r.memo)}</p>` : ""}
         ${r.link ? `<a class="fl" href="${esc(r.link)}" target="_blank" rel="noopener">${esc(host(r.link))} ↗</a>` : ""}
-        ${r.member === me ? `<button type="button" class="del" data-id="${esc(r.id)}">지우기</button>` : ""}
+        ${r.member === me ? `
+          ${(r.views !== "" && r.views != null) || (r.saves !== "" && r.saves != null) ? `<p class="metric">조회 <b>${r.views !== "" && r.views != null ? fmtN(r.views) : "-"}</b> · 저장 <b>${r.saves !== "" && r.saves != null ? fmtN(r.saves) : "-"}</b></p>` : ""}
+          ${editNums === r.id ? `
+          <form class="numform" data-id="${esc(r.id)}" novalidate>
+            <input type="number" inputmode="numeric" min="0" name="v" value="${esc(r.views ?? "")}" placeholder="조회수" aria-label="조회수">
+            <input type="number" inputmode="numeric" min="0" name="s" value="${esc(r.saves ?? "")}" placeholder="저장 수" aria-label="저장 수">
+            <button type="submit">저장</button>
+          </form>` : ""}
+          <div class="acts">
+            ${editNums === r.id ? "" : `<button type="button" class="del nb" data-id="${esc(r.id)}">숫자 적기</button>`}
+            <button type="button" class="del dl" data-id="${esc(r.id)}">지우기</button>
+          </div>` : ""}
       </li>`).join("")}</ul>` : `<p class="empty" style="text-align:center;margin-top:18px">아직 올라온 콘텐츠가 없어요. Activity에서 첫 링크를 남겨 보세요.</p>`}
   </section>`;
   $("#fAll").onclick = () => { feedMine = false; render(); };
   if ($("#fMine")) $("#fMine").onclick = () => { feedMine = true; render(); };
-  v.querySelectorAll(".del").forEach(b => b.onclick = async () => {
+  v.querySelectorAll(".nb").forEach(b => b.onclick = () => { editNums = b.dataset.id; render(); });
+  v.querySelectorAll(".numform").forEach(f => f.onsubmit = async e => {
+    e.preventDefault();
+    const id = f.dataset.id, views = numOrEmpty(f.v.value), saves = numOrEmpty(f.s.value);
+    f.querySelector("button").disabled = true;
+    try{
+      await post({action:"nums", id, member:me, views, saves});
+      const r = rows.find(x => x.id === id); if (r){ r.views = views; r.saves = saves; }
+      editNums = null; toast("숫자를 저장했어요."); render();
+    }catch(err){ toast("저장하지 못했어요. 다시 시도해 주세요."); f.querySelector("button").disabled = false; }
+  });
+  v.querySelectorAll(".dl").forEach(b => b.onclick = async () => {
     if (b.dataset.confirm !== "1"){ b.dataset.confirm = "1"; b.textContent = "한 번 더 누르면 지워져요"; return; }
     b.disabled = true;
     try{ await post({action:"delete", id:b.dataset.id, member:me}); toast("지웠어요."); if (SCRIPT_URL) await load(); else render(); }
