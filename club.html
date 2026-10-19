@@ -28,6 +28,8 @@
   --ink:#151413;       /* black */
   --mute:#97938D;      /* soft grey-brown */
   --line:#D4D2CE;
+  --warn:#B3261E;       /* 목표 미달 경고 */
+  --warnbg:#F6E3E0;
   --serif:"Newsreader","Pretendard Variable",Pretendard,Georgia,sans-serif;
   --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;
   color-scheme:light;
@@ -99,6 +101,32 @@ textarea{width:100%;font:inherit;font-size:16px;line-height:1.7;background:var(-
 .legend i.sq{background:none;border:1.5px solid var(--ink);border-radius:2px}
 .c.last{box-shadow:inset 0 0 0 1.5px var(--ink);opacity:1}
 .c.last .d{color:var(--ink);font-weight:700}
+.target .tg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.tgi{background:var(--bg);border-radius:18px;padding:16px 10px 14px;text-align:center;display:grid;gap:2px}
+.tgi .tl{font-size:13px;color:var(--mute)}
+.tgi b{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--mute)}
+.tgi b em{font-style:normal;color:var(--ink)}
+.tgi .tm{font-size:13px;font-weight:400}
+.tgi.hit{background:var(--ink);color:var(--card)}
+.tgi.hit .tl,.tgi.hit b{color:#B9B6B0}
+.tgi.hit b em{color:var(--card)}
+.tgi.miss .tm{color:var(--warn)}
+.storybtns{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.storybtns .btn.ghost{padding:14px 18px}
+.btn.ghost:disabled{opacity:.35}
+.warn{margin-top:12px;border-radius:14px;padding:12px 14px;background:var(--bg);color:var(--warn);font-size:14px;font-weight:400;display:grid;gap:4px}
+.warn p::before{content:"! "}
+.warn.good{background:var(--bg);color:var(--ink);font-weight:500}
+.warn.good p::before{content:""}
+.streak{display:grid;grid-template-columns:1fr 1fr;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);text-align:center}
+.streak b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.streak span{font-size:12px;color:var(--mute)}
+.kind{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kind button{border:1px solid var(--line);border-radius:12px;padding:11px 0;font-size:15px;background:var(--card)}
+.kind button[aria-checked="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.kt{font-size:11px;font-weight:500;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:1px 7px;margin-left:4px;vertical-align:2px}
+.banner{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;margin-top:20px;border-radius:18px;padding:12px 16px;background:var(--card);color:var(--warn);font-size:13px;font-weight:400}
+.banner span:first-child{font-size:14px}
 .dday{text-align:center;font-size:13px;color:var(--mute);margin-top:8px}
 .nums{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .nums input{width:100%;font:inherit;font-size:16px;background:var(--bg);border:1px solid transparent;border-radius:14px;padding:13px 14px;color:var(--ink)}
@@ -198,7 +226,7 @@ input::placeholder{color:var(--mute)}
 
 <script>
 /* 페이지 버전: 고칠 때마다 바꿔요. 홈 화면 앱이 새 버전을 알아차리고 스스로 새로고침해요. */
-const VERSION = "2026-10-18.7";
+const VERSION = "2026-10-19.3";
 async function checkVersion(){
   try{
     const r = await fetch(location.pathname + "?nocache=" + Date.now(), {cache:"no-store"});
@@ -219,6 +247,8 @@ const MEMBERS = [{"id":"hyoji","name":"권효지","nick":"Host","handle":""},{"i
 const START = "2026-10"; // 클럽 시작 달
 const END = "2026-12";   // 달력에서 넘겨볼 수 있는 마지막 달
 const LAST_DAY = "2026-12-31"; // 1기 마지막 날
+const REELS_PER_WEEK = 2;    // 릴스 목표: 주(일~토) 2개 이상
+const STORIES_PER_DAY = 3;   // 스토리 목표: 매일 3개 이상
 
 const $ = s => document.querySelector(s);
 const byId = Object.fromEntries(MEMBERS.map(m => [m.id, m]));
@@ -243,6 +273,7 @@ let goals = {};
 let editGoal = false;
 let goalDays = 8;
 let notes = [];
+let stories = {};   /* "member|YYYY-MM-DD" -> count */
 let editNums = null;
 let noteEdit = null;
 let noteDraft = null;
@@ -250,7 +281,7 @@ let loadError = false;
 let cached = false;
 try{
   const c = JSON.parse(store.get("pc_cache") || "null");
-  if (c && Array.isArray(c.rows)){ rows = c.rows; profiles = c.profiles || {}; goals = c.goals || {}; notes = c.notes || []; cached = true; }
+  if (c && Array.isArray(c.rows)){ rows = c.rows; profiles = c.profiles || {}; goals = c.goals || {}; notes = c.notes || []; stories = c.stories || {}; cached = true; }
 }catch(e){}
 
 /* ---------- data ---------- */
@@ -259,6 +290,7 @@ async function load(){
     try{ rows = JSON.parse(store.get("pc_demo_rows") || "[]"); }catch(e){ rows = []; }
     try{ profiles = JSON.parse(store.get("pc_demo_profiles") || "{}"); }catch(e){ profiles = {}; }
     try{ goals = JSON.parse(store.get("pc_demo_goals") || "{}"); }catch(e){ goals = {}; }
+    try{ stories = JSON.parse(store.get("pc_demo_stories") || "{}"); }catch(e){ stories = {}; }
     notes = [{date:"2026-10-18", title:"예시 · 첫 번째 브랜딩 노트", body:"구글시트의 branding 탭에 한 줄을 추가하면 이 자리에 글이 올라와요.\n줄바꿈도 그대로 보여요.", link:"https://www.instagram.com/", demo:true}];
     loading = false; render(); return;
   }
@@ -271,8 +303,8 @@ async function load(){
   }catch(e){ j = null; }
   if (!j || !j.ok){ try{ j = await jsonp(); }catch(e){ j = null; } }
   if (j && j.ok){
-    rows = j.rows || []; profiles = j.profiles || {}; goals = j.goals || {}; notes = j.notes || [];
-    store.set("pc_cache", JSON.stringify({rows, profiles, goals, notes}));
+    rows = j.rows || []; profiles = j.profiles || {}; goals = j.goals || {}; notes = j.notes || []; stories = j.stories || {};
+    store.set("pc_cache", JSON.stringify({rows, profiles, goals, notes, stories}));
     loadError = false;
   } else if (!cached){
     loadError = true;
@@ -296,17 +328,18 @@ function jsonp(){
 async function post(body){
   if (!SCRIPT_URL){
     if (body.action === "goal"){ goals[body.member + "|" + body.month] = {goal:body.goal, days:body.days}; store.set("pc_demo_goals", JSON.stringify(goals)); return true; }
+    if (body.action === "story"){ const k = body.member + "|" + body.date; stories[k] = Math.max(0, (stories[k] || 0) + body.delta); store.set("pc_demo_stories", JSON.stringify(stories)); return {ok:true, count:stories[k]}; }
     if (body.action === "profile"){ profiles[body.member] = body.idt; store.set("pc_demo_profiles", JSON.stringify(profiles)); return true; }
     if (body.action === "delete") rows = rows.filter(r => r.id !== body.id);
     else if (body.action === "nums"){ const r = rows.find(x => x.id === body.id); if (r){ r.views = body.views; r.saves = body.saves; } }
-    else rows.push({id:"d"+Date.now(), at:new Date().toISOString(), member:body.member, date:body.date, link:body.link, memo:body.memo, views:body.views||"", saves:body.saves||""});
+    else rows.push({id:"d"+Date.now(), at:new Date().toISOString(), member:body.member, date:body.date, link:body.link, memo:body.memo, views:body.views||"", saves:body.saves||"", kind:body.kind||""});
     store.set("pc_demo_rows", JSON.stringify(rows));
     return true;
   }
   const r = await fetch(SCRIPT_URL, {method:"POST", body:JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) throw new Error(j.error || "fail");
-  return true;
+  return j;
 }
 
 /* ---------- helpers ---------- */
@@ -314,6 +347,46 @@ function monthKey(d){ return d.getFullYear() + "-" + pad(d.getMonth()+1); }
 function myGoal(id){ return goals[id + "|" + monthKey(new Date())] || null; }
 function numOrEmpty(v){ v = String(v).replace(/[^0-9]/g, ""); return v === "" ? "" : String(Number(v)); }
 const fmtN = n => Number(n).toLocaleString("ko-KR");
+function isReel(r){ return r.kind ? r.kind === "reel" : /\/reels?\//i.test(String(r.link || "")); }
+function reelsInWeek(id, ws){
+  const from = ymd(ws); const e = new Date(ws); e.setDate(e.getDate()+6); const to = ymd(e);
+  return rows.filter(r => r.member === id && isReel(r) && r.date >= from && r.date <= to).length;
+}
+function storyCount(id, d){ return Number(stories[id + "|" + d] || 0); }
+function storyStreak(id){
+  const x = new Date(); x.setHours(0,0,0,0);
+  if (storyCount(id, ymd(x)) < STORIES_PER_DAY) x.setDate(x.getDate()-1);
+  let n = 0; while (storyCount(id, ymd(x)) >= STORIES_PER_DAY){ n++; x.setDate(x.getDate()-1); }
+  return n;
+}
+function reelWeekStreak(id){
+  let ws = weekStart(new Date());
+  if (reelsInWeek(id, ws) < REELS_PER_WEEK) ws.setDate(ws.getDate()-7);
+  let n = 0; while (reelsInWeek(id, ws) >= REELS_PER_WEEK){ n++; ws.setDate(ws.getDate()-7); }
+  return n;
+}
+function goalStatus(id){
+  const now = new Date(); const today = ymd(now);
+  const reels = reelsInWeek(id, weekStart(now));
+  const st = storyCount(id, today);
+  const daysLeft = 6 - now.getDay();               /* 오늘 뒤로 남은 날 (토요일 = 0) */
+  const hoursLeft = 24 - now.getHours();
+  const reelNeed = Math.max(0, REELS_PER_WEEK - reels);
+  const storyNeed = Math.max(0, STORIES_PER_DAY - st);
+  const warns = [];
+  if (storyNeed > 0){
+    warns.push(now.getHours() >= 18
+      ? "오늘 스토리 " + storyNeed + "개가 남았어요. 자정까지 " + hoursLeft + "시간!"
+      : "오늘 스토리 " + storyNeed + "개를 더 올려야 해요.");
+  }
+  if (reelNeed > 0){
+    if (reelNeed > daysLeft + 1) warns.push("이번 주 릴스 " + reelNeed + "개가 남았는데 남은 날이 " + (daysLeft + 1) + "일뿐이에요. 오늘 바로 올려주세요!");
+    else if (daysLeft <= 2) warns.push("이번 주가 " + (daysLeft + 1) + "일 남았어요. 릴스 " + reelNeed + "개를 더 올려야 해요.");
+    else warns.push("이번 주 릴스 " + reelNeed + "개가 남았어요.");
+  }
+  const urgent = (storyNeed > 0 && now.getHours() >= 18) || (reelNeed > 0 && daysLeft <= 2);
+  return {reels, st, reelNeed, storyNeed, warns, urgent, done: !reelNeed && !storyNeed};
+}
 function myDays(id){ return new Set(rows.filter(r => r.member === id).map(r => r.date)); }
 function weekStart(d){ const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate() - x.getDay()); return x; }
 function countRange(days, from, n){ let c = 0; const x = new Date(from); for (let i=0;i<n;i++){ if (days.has(ymd(x))) c++; x.setDate(x.getDate()+1); } return c; }
@@ -358,13 +431,14 @@ function render(){
   $("#navBr").setAttribute("aria-current", tab === "br" ? "page" : "false");
   if (cached && SCRIPT_URL) loading = false;
   if (loadError){ v.innerHTML = `<section class="card"><p class="lbl">Offline</p><p class="sum">기록을 불러오지 못했어요.</p><p class="sub">인터넷 연결을 확인하고 다시 시도해 주세요.</p><div style="margin-top:18px;display:grid"><button class="btn" type="button" id="retry">다시 불러오기</button></div></section>`; $("#retry").onclick = () => { loadError = false; loading = true; render(); load(); }; return; }
-  if (tab === "mem"){ renderMem(v); return; }
-  if (tab === "br"){ if (loading){ v.innerHTML = `<section class="card"><p class="lbl">Loading</p><p class="sub">불러오는 중이에요.</p></section>`; return; } renderBr(v); return; }
+  const bn = goalBanner();
+  if (tab === "mem"){ renderMem(v); addBanner(v, bn); return; }
+  if (tab === "br"){ if (loading){ v.innerHTML = `<section class="card"><p class="lbl">Loading</p><p class="sub">불러오는 중이에요.</p></section>`; return; } renderBr(v); addBanner(v, bn); return; }
   if (!me && tab !== "con"){ v.innerHTML = `<section class="card"><p class="lbl">Welcome</p><p class="sum">포지티브 클럽 1기 도장판이에요.</p><p class="sub">먼저 내 이름을 골라 주세요.</p><div style="margin-top:18px;display:grid"><button class="btn" type="button" id="pickOpen">이름 고르기</button></div></section>`; $("#pickOpen").onclick = openSheet; return; }
   if (loading){ v.innerHTML = `<section class="card"><p class="lbl">Loading</p><p class="sub">기록을 불러오는 중이에요.</p></section>`; return; }
   if (tab === "act") renderAct(v, m);
-  else if (tab === "bio") renderBio(v, m);
-  else renderCon(v);
+  else if (tab === "bio"){ renderBio(v, m); addBanner(v, bn); }
+  else { renderCon(v); addBanner(v, bn); }
 }
 
 function goalBlock(){
@@ -385,6 +459,66 @@ function ddayText(){
   return "포지티브 클럽 1기는 12월 31일에 마무리됐어요.";
 }
 function monthLabel(){ return (new Date().getMonth()+1) + "월"; }
+
+function targetCard(){
+  const g = goalStatus(me);
+  const sStreak = storyStreak(me), rStreak = reelWeekStreak(me);
+  return `<section class="card target ${g.done ? "ok" : (g.urgent ? "urgent" : "")}">
+    <p class="lbl">This Week</p>
+    <div class="tg">
+      <div class="tgi ${g.reelNeed ? "miss" : "hit"}">
+        <span class="tl">이번 주 릴스</span>
+        <b><em>${g.reels}</em>/${REELS_PER_WEEK}</b>
+        <span class="tm">${g.reelNeed ? g.reelNeed + "개 남음" : "달성"}</span>
+      </div>
+      <div class="tgi ${g.storyNeed ? "miss" : "hit"}">
+        <span class="tl">오늘 스토리</span>
+        <b><em>${g.st}</em>/${STORIES_PER_DAY}</b>
+        <span class="tm">${g.storyNeed ? g.storyNeed + "개 남음" : "달성"}</span>
+      </div>
+    </div>
+    <div class="storybtns">
+      <button class="btn" type="button" id="storyPlus">스토리 올렸어요 +1</button>
+      <button class="btn ghost" type="button" id="storyMinus" aria-label="스토리 하나 빼기" ${g.st ? "" : "disabled"}>−1</button>
+    </div>
+    ${g.warns.length ? `<div class="warn" role="alert">${g.warns.map(w => `<p>${esc(w)}</p>`).join("")}</div>` : `<div class="warn good"><p>오늘 목표를 모두 채웠어요. 이대로 이어가요!</p></div>`}
+    <div class="streak">
+      <div><b>${rStreak}</b><span>릴스 연속 달성(주)</span></div>
+      <div><b>${sStreak}</b><span>스토리 연속 달성(일)</span></div>
+    </div>
+    <p class="small" style="text-align:center;margin-top:10px">목표 · 릴스 주 ${REELS_PER_WEEK}개 이상, 스토리 매일 ${STORIES_PER_DAY}개 이상 (한 주는 일~토)</p>
+  </section>`;
+}
+function bindTarget(){
+  const go = async delta => {
+    if (busy) return; busy = true;
+    const k = me + "|" + ymd(new Date());
+    const before = Number(stories[k] || 0);
+    stories[k] = Math.max(0, before + delta); render();
+    try{
+      const j = await post({action:"story", member:me, date:ymd(new Date()), delta});
+      if (j && typeof j.count === "number"){ stories[k] = j.count; }
+      try{ const c = JSON.parse(store.get("pc_cache") || "{}"); c.stories = stories; store.set("pc_cache", JSON.stringify(c)); }catch(e){}
+      if (delta > 0 && stories[k] === STORIES_PER_DAY) toast("오늘 스토리 목표 달성!");
+      render();
+    }catch(err){ stories[k] = before; toast("저장하지 못했어요. 다시 눌러 주세요."); render(); }
+    busy = false;
+  };
+  if ($("#storyPlus")) $("#storyPlus").onclick = () => go(1);
+  if ($("#storyMinus")) $("#storyMinus").onclick = () => go(-1);
+}
+function addBanner(v, html){
+  if (!html) return;
+  v.insertAdjacentHTML("afterbegin", html);
+  const b = v.querySelector("[data-go-act]"); if (b) b.onclick = () => { tab = "act"; store.set("pc_tab", tab); render(); window.scrollTo(0, 0); };
+}
+function goalBanner(){
+  if (!me || tab === "act" || loading) return "";
+  const g = goalStatus(me);
+  if (g.done) return "";
+  return `<button type="button" class="banner ${g.urgent ? "urgent" : ""}" data-go-act>
+    <span>릴스 ${g.reels}/${REELS_PER_WEEK} · 스토리 ${g.st}/${STORIES_PER_DAY}</span><span>${esc(g.warns[0])}</span></button>`;
+}
 
 function renderAct(v, m){
   const days = myDays(me);
@@ -407,6 +541,7 @@ function renderAct(v, m){
   const todayMembers = [...new Set(rows.filter(r => r.date === today).map(r => r.member))].filter(id => byId[id]);
 
   v.innerHTML = `
+  ${targetCard()}
   <section class="card">
     <p class="lbl">Summary</p>
     <p class="sum">${esc(s.main)}</p>
@@ -425,9 +560,13 @@ function renderAct(v, m){
 
   <section class="card">
     <h3>오늘의 도장</h3>
-    <p class="hint">게시물이나 릴스를 올렸다면 링크를 남겨 주세요.</p>
+    <p class="hint">게시물이나 릴스를 올렸다면 링크를 남겨 주세요. 릴스로 남기면 이번 주 릴스 목표에 바로 반영돼요.</p>
     ${todayRows.length ? `<div class="done"><i></i><span>오늘 도장 완료. 더 올렸다면 하나 더 남겨도 돼요.</span></div>` : ""}
     <form id="stampForm" autocomplete="off" novalidate>
+      <div class="kind" role="radiogroup" aria-label="콘텐츠 종류">
+        <button type="button" role="radio" data-kind="reel" aria-checked="true">릴스</button>
+        <button type="button" role="radio" data-kind="post" aria-checked="false">게시물</button>
+      </div>
       <input type="url" id="f-link" inputmode="url" placeholder="인스타 링크 붙여넣기">
       <div class="nums">
         <input type="number" id="f-views" inputmode="numeric" min="0" placeholder="조회수 (선택)">
@@ -444,8 +583,17 @@ function renderAct(v, m){
   </section>`;
 
   v.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { tab = b.dataset.go; editGoal = true; store.set("pc_tab", tab); render(); });
+  bindTarget();
   $("#prevM").onclick = () => { viewMonth.setMonth(viewMonth.getMonth()-1); render(); };
   $("#nextM").onclick = () => { viewMonth.setMonth(viewMonth.getMonth()+1); render(); };
+  let kind = "reel";
+  const kb = v.querySelectorAll("[data-kind]");
+  kb.forEach(b => b.onclick = () => { kind = b.dataset.kind; kb.forEach(x => x.setAttribute("aria-checked", String(x === b))); });
+  $("#f-link").addEventListener("input", e => {
+    const val = e.target.value;
+    const k = /\/reels?\//i.test(val) ? "reel" : (/\/p\//i.test(val) ? "post" : null);
+    if (k){ kind = k; kb.forEach(x => x.setAttribute("aria-checked", String(x.dataset.kind === k))); }
+  });
   $("#stampForm").onsubmit = async e => {
     e.preventDefault();
     if (busy) return;
@@ -455,8 +603,8 @@ function renderAct(v, m){
     if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
     busy = true; $("#f-btn").disabled = true;
     try{
-      await post({member:me, date:today, link, memo, views, saves});
-      toast("도장 찍었어요.");
+      await post({member:me, date:today, link, memo, views, saves, kind});
+      toast(kind === "reel" ? "릴스 도장 찍었어요. 이번 주 릴스 " + (reelsInWeek(me, weekStart(new Date())) + 1) + "/" + REELS_PER_WEEK : "도장 찍었어요.");
       if (SCRIPT_URL){ loading = false; await load(); } else render();
     }catch(err){ toast("저장하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요."); $("#f-btn").disabled = false; }
     busy = false;
@@ -680,7 +828,7 @@ function renderCon(v){
     </div>
     ${list.length ? `<ul class="feed" style="margin-top:12px">${list.map(r => `
       <li>
-        <div class="fh"><b>${esc(byId[r.member].name)}</b><span>${fmt(r.date)}</span></div>
+        <div class="fh"><b>${esc(byId[r.member].name)} <small class="kt">${isReel(r) ? "릴스" : "게시물"}</small></b><span>${fmt(r.date)}</span></div>
         ${r.memo ? `<p class="memo">${esc(r.memo)}</p>` : ""}
         ${r.link ? `<a class="fl" href="${esc(r.link)}" target="_blank" rel="noopener">${esc(host(r.link))} ↗</a>` : ""}
         ${r.member === me ? `
